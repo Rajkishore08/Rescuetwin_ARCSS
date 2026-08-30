@@ -1,154 +1,128 @@
 import React, { useMemo } from 'react';
-import * as THREE from 'three';
 import { Html } from '@react-three/drei';
+import * as THREE from 'three';
 import { useRescueTwinStore } from '../../state/rescueTwinStore';
-import { Navigation, XCircle, CheckCircle } from 'lucide-react';
+import { Navigation, AlertOctagon, CheckCircle2 } from 'lucide-react';
+
+const ROUTE_WAYPOINTS: Record<string, [number, number, number][]> = {
+  A: [
+    [0, 0.4, 4.5],
+    [-1.5, 1.2, 3.0],
+    [-2.2, 2.5, 1.5],
+    [-1.8, 3.5, 0.2],
+    [0.6, 0.3, -1.2],
+  ],
+  B: [
+    [0, 0.4, 4.5],
+    [2.0, 1.0, 3.5],
+    [3.2, 2.2, 1.0],
+    [2.8, 3.2, -0.5],
+    [1.5, 1.5, -1.0],
+    [0.6, 0.3, -1.2],
+  ],
+  C: [
+    [0, 0.4, 4.5],
+    [1.5, 0.4, 4.2],
+    [3.0, 0.4, 3.0],
+    [3.5, 0.4, 0.5],
+    [2.0, 0.4, -1.0],
+    [0.6, 0.3, -1.2],
+  ],
+};
 
 export const RescueRoutesSplines: React.FC = () => {
   const routes = useRescueTwinStore((s) => s.routes);
   const showLabels = useRescueTwinStore((s) => s.digitalTwin.show3DLabels);
-  const routeA = routes.find((r) => r.id === 'A');
-  const routeB = routes.find((r) => r.id === 'B');
-  const routeC = routes.find((r) => r.id === 'C');
+  const zoomDist = useRescueTwinStore((s) => s.cameraZoomDistance);
+  const setSelected = useRescueTwinStore((s) => s.setSelectedElement);
+  const selectedElement = useRescueTwinStore((s) => s.digitalTwin.selectedElementId);
 
-  // Curve definition for Route A (North direct corridor)
-  const curveA = useMemo(() => {
-    return new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, 0.2, 4.5),
-      new THREE.Vector3(-1.0, 0.25, 2.5),
-      new THREE.Vector3(-2.2, 0.4, 1.2),
-      new THREE.Vector3(-2.0, 1.8, -0.5),
-      new THREE.Vector3(0.6, 0.4, -1.2),
-    ]);
-  }, []);
+  const dynamicDistanceFactor = Math.max(16, Math.min(38, zoomDist * 1.15));
 
-  // Curve definition for Route B (East shear wall safe ramp)
-  const curveB = useMemo(() => {
-    return new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, 0.2, 4.5),
-      new THREE.Vector3(2.0, 0.25, 3.5),
-      new THREE.Vector3(3.2, 0.3, 1.5),
-      new THREE.Vector3(3.0, 0.35, -1.0),
-      new THREE.Vector3(1.8, 0.35, -1.8),
-      new THREE.Vector3(0.6, 0.3, -1.2),
-    ]);
-  }, []);
-
-  // Curve definition for Route C (South exterior gantry)
-  const curveC = useMemo(() => {
-    return new THREE.CatmullRomCurve3([
-      new THREE.Vector3(0, 0.2, 4.5),
-      new THREE.Vector3(-2.5, 0.25, 4.0),
-      new THREE.Vector3(-3.5, 0.3, 2.0),
-      new THREE.Vector3(-3.2, 0.3, 0.0),
-      new THREE.Vector3(-1.5, 0.3, -1.5),
-      new THREE.Vector3(0.6, 0.3, -1.2),
-    ]);
-  }, []);
-
-  const isARejected = routeA?.status === 'REJECTED';
-  const isBRecommended = routeB?.status === 'RECOMMENDED';
+  const curves = useMemo(() => {
+    return routes.map((r) => {
+      const waypoints = ROUTE_WAYPOINTS[r.id] || ROUTE_WAYPOINTS['B'];
+      const points = waypoints.map((p) => new THREE.Vector3(p[0], p[1], p[2]));
+      const curve = new THREE.CatmullRomCurve3(points);
+      const tubeGeo = new THREE.TubeGeometry(curve, 32, 0.08, 8, false);
+      const midPoint = curve.getPoint(0.5);
+      return { route: r, waypoints, tubeGeo, midPoint };
+    });
+  }, [routes]);
 
   return (
     <group>
-      {/* ========================================================
-          ROUTE A (North Corridor)
-         ======================================================== */}
-      {routeA && (
-        <group>
-          <mesh>
-            <tubeGeometry args={[curveA, 64, isARejected ? 0.04 : 0.06, 8, false]} />
-            <meshStandardMaterial
-              color={isARejected ? '#ef4444' : '#f59e0b'}
-              emissive={isARejected ? '#ef4444' : '#f59e0b'}
-              emissiveIntensity={isARejected ? 0.8 : 0.3}
-              transparent
-              opacity={isARejected ? 0.45 : 0.8}
-              wireframe={isARejected}
-            />
-          </mesh>
+      {curves.map(({ route, waypoints, tubeGeo, midPoint }) => {
+        const isRecommended = route.status === 'RECOMMENDED';
+        const isRejected = route.status === 'REJECTED';
+        const isSelected = selectedElement === `ROUTE_${route.id}`;
 
-          {/* Compact Midpoint Tag */}
-          {showLabels && (
-            <Html position={[-2.0, 1.2, 0.8]} center distanceFactor={28}>
-              <div className={`pointer-events-none select-none border rounded px-1.5 py-0.5 backdrop-blur-md text-[9px] font-mono whitespace-nowrap flex items-center gap-1 ${
-                isARejected
-                  ? 'border-red-500 bg-red-950/90 text-red-200 shadow-[0_0_10px_rgba(239,68,68,0.6)]'
-                  : 'border-amber-500/70 bg-slate-900/90 text-amber-200'
-              }`}>
-                {isARejected ? (
-                  <XCircle className="w-3 h-3 text-red-400" />
-                ) : (
-                  <Navigation className="w-3 h-3 text-amber-400" />
-                )}
-                <span className="font-bold">ROUTE A</span>
-                <span className="text-slate-400">|</span>
-                <span className={isARejected ? 'text-red-400 font-bold' : 'text-amber-300'}>
-                  {isARejected ? 'REJECTED (76%)' : '38%'}
-                </span>
-              </div>
-            </Html>
-          )}
-        </group>
-      )}
+        const color = isRejected ? '#ef4444' : isRecommended ? '#10b981' : '#eab308';
 
-      {/* ========================================================
-          ROUTE B (East Shear Ramp - Recommended)
-         ======================================================== */}
-      {routeB && (
-        <group>
-          <mesh>
-            <tubeGeometry args={[curveB, 64, isBRecommended ? 0.08 : 0.05, 8, false]} />
-            <meshStandardMaterial
-              color="#10b981"
-              emissive="#10b981"
-              emissiveIntensity={isBRecommended ? 0.9 : 0.4}
-              transparent
-              opacity={0.9}
-            />
-          </mesh>
-
-          {/* Waypoint beacons along Route B */}
-          {[
-            [2.0, 0.25, 3.5],
-            [3.2, 0.3, 1.5],
-            [3.0, 0.35, -1.0],
-          ].map(([x, y, z], i) => (
-            <mesh key={`wp-${i}`} position={[x, y + 0.1, z]}>
-              <cylinderGeometry args={[0.08, 0.08, 0.04, 12]} />
-              <meshBasicMaterial color="#00f0ff" />
+        return (
+          <group
+            key={route.id}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelected(`ROUTE_${route.id}`);
+            }}
+          >
+            {/* 3D Spline Path Tube */}
+            <mesh geometry={tubeGeo}>
+              <meshStandardMaterial
+                color={color}
+                emissive={color}
+                emissiveIntensity={isRecommended ? 0.8 : isRejected ? 0.4 : 0.3}
+                roughness={0.2}
+                metalness={0.5}
+                transparent
+                opacity={isRejected ? 0.35 : 0.9}
+              />
             </mesh>
-          ))}
 
-          {/* Compact Midpoint Tag */}
-          {showLabels && (
-            <Html position={[3.2, 0.9, 1.0]} center distanceFactor={28}>
-              <div className="pointer-events-none select-none border border-emerald-400 bg-slate-900/95 text-emerald-200 rounded px-2 py-0.8 backdrop-blur-md text-[9px] font-mono whitespace-nowrap flex items-center gap-1.5 shadow-[0_0_12px_rgba(16,185,129,0.4)]">
-                <CheckCircle className="w-3 h-3 text-emerald-400" />
-                <span className="font-bold">ROUTE B (41m)</span>
-                <span className="text-slate-400">|</span>
-                <span className="text-emerald-300 font-extrabold">RECOMMENDED (29%)</span>
-              </div>
-            </Html>
-          )}
-        </group>
-      )}
+            {/* Glowing Waypoint Spheres */}
+            {waypoints.map((wp, idx) => (
+              <mesh key={`wp-${idx}`} position={wp}>
+                <sphereGeometry args={[0.12, 12, 12]} />
+                <meshStandardMaterial
+                  color={color}
+                  emissive={color}
+                  emissiveIntensity={isRecommended ? 1.0 : 0.4}
+                />
+              </mesh>
+            ))}
 
-      {/* ========================================================
-          ROUTE C (South Gantry)
-         ======================================================== */}
-      {routeC && (
-        <mesh>
-          <tubeGeometry args={[curveC, 64, 0.04, 8, false]} />
-          <meshStandardMaterial
-            color="#00f0ff"
-            emissive="#00f0ff"
-            emissiveIntensity={0.2}
-            transparent
-            opacity={0.4}
-          />
-        </mesh>
-      )}
+            {/* Reactive Floating Route HUD Tag */}
+            {showLabels && (
+              <Html position={[midPoint.x, midPoint.y + 0.4, midPoint.z]} center distanceFactor={dynamicDistanceFactor}>
+                <div className={`pointer-events-none select-none border rounded px-1.5 py-0.5 backdrop-blur-md text-[9px] font-mono whitespace-nowrap flex items-center gap-1 transition-all ${
+                  isRejected
+                    ? 'border-red-500/80 bg-red-950/90 text-red-300'
+                    : isRecommended
+                    ? 'border-emerald-400 bg-slate-900/95 text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.4)] ring-1 ring-emerald-400/50'
+                    : 'border-amber-500/70 bg-slate-900/90 text-amber-200'
+                } ${isSelected ? 'ring-1 ring-cyan-400' : ''}`}>
+                  <Navigation className="w-2.5 h-2.5" />
+                  <span className="font-bold">ROUTE {route.id}</span>
+                  <span className="text-slate-400">|</span>
+                  <span className="text-slate-300">{route.distanceMeters}m</span>
+                  {isRecommended ? (
+                    <span className="text-emerald-400 font-extrabold flex items-center gap-0.5">
+                      <CheckCircle2 className="w-2.5 h-2.5" /> OPTIMAL
+                    </span>
+                  ) : isRejected ? (
+                    <span className="text-red-400 font-bold flex items-center gap-0.5">
+                      <AlertOctagon className="w-2.5 h-2.5" /> REJECTED
+                    </span>
+                  ) : (
+                    <span className="text-amber-300 font-semibold">{route.structuralRiskPct}% RISK</span>
+                  )}
+                </div>
+              </Html>
+            )}
+          </group>
+        );
+      })}
     </group>
   );
 };

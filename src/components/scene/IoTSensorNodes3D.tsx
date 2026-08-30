@@ -6,8 +6,11 @@ import { Activity, Thermometer, Wind, Maximize2 } from 'lucide-react';
 export const IoTSensorNodes3D: React.FC = () => {
   const sensorNodes = useRescueTwinStore((s) => s.telemetry.sensorNodes);
   const showLabels = useRescueTwinStore((s) => s.digitalTwin.show3DLabels);
+  const zoomDist = useRescueTwinStore((s) => s.cameraZoomDistance);
   const setSelected = useRescueTwinStore((s) => s.setSelectedElement);
   const selectedElement = useRescueTwinStore((s) => s.digitalTwin.selectedElementId);
+
+  const dynamicDistanceFactor = Math.max(16, Math.min(38, zoomDist * 1.15));
 
   return (
     <group>
@@ -60,9 +63,9 @@ export const IoTSensorNodes3D: React.FC = () => {
             {/* Point light for spatial illumination */}
             <pointLight color={color} intensity={isCritical ? 2.0 : 0.6} distance={2.5} />
 
-            {/* Compact Technical Tooltip Tag */}
+            {/* Compact Reactive Technical Tooltip Tag */}
             {showLabels && (
-              <Html position={[0, 0.25, 0]} center distanceFactor={28}>
+              <Html position={[0, 0.25, 0]} center distanceFactor={dynamicDistanceFactor}>
                 <div className={`pointer-events-none select-none border rounded px-1.5 py-0.5 backdrop-blur-md text-[9px] font-mono whitespace-nowrap flex items-center gap-1 transition-all ${
                   isCritical
                     ? 'border-red-500 bg-red-950/90 text-red-200 shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-bounce'

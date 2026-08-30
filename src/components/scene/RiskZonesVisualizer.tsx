@@ -8,6 +8,7 @@ export const RiskZonesVisualizer: React.FC = () => {
   const zones = useRescueTwinStore((s) => s.digitalTwin.activeZones);
   const arMode = useRescueTwinStore((s) => s.digitalTwin.arMode);
   const showLabels = useRescueTwinStore((s) => s.digitalTwin.show3DLabels);
+  const zoomDist = useRescueTwinStore((s) => s.cameraZoomDistance);
   const aiEngine = useRescueTwinStore((s) => s.aiEngine);
   const robotStatus = useRescueTwinStore((s) => s.telemetry.robot.status);
   const setSelected = useRescueTwinStore((s) => s.setSelectedElement);
@@ -17,12 +18,12 @@ export const RiskZonesVisualizer: React.FC = () => {
   const survivorZone = zones.SURVIVOR_ZONE;
 
   const isCriticalA = zoneA?.riskPct > 60;
+  // Reactive distance factor based on camera zoom distance
+  const dynamicDistanceFactor = Math.max(16, Math.min(38, zoomDist * 1.15));
 
   return (
     <group>
-      {/* ========================================================
-          ZONE A: NORTH SECTION (HIGH STRUCTURAL RISK)
-         ======================================================== */}
+      {/* ZONE A: NORTH SECTION */}
       {zoneA && (
         <group position={zoneA.center} onClick={(e) => { e.stopPropagation(); setSelected('ZONE_A'); }}>
           <mesh>
@@ -34,15 +35,14 @@ export const RiskZonesVisualizer: React.FC = () => {
               depthWrite={false}
             />
           </mesh>
-          {/* Wireframe box border */}
           <lineSegments>
             <edgesGeometry args={[new THREE.BoxGeometry(...zoneA.size)]} />
             <lineBasicMaterial color={isCriticalA ? '#ef4444' : '#eab308'} />
           </lineSegments>
 
-          {/* Compact Floating Technical HUD Label */}
+          {/* Reactive Scaled HUD Label */}
           {showLabels && (
-            <Html position={[0, zoneA.size[1] / 2 + 0.35, 0]} center distanceFactor={28}>
+            <Html position={[0, zoneA.size[1] / 2 + 0.35, 0]} center distanceFactor={dynamicDistanceFactor}>
               <div className={`pointer-events-none select-none transition-all duration-300 ${
                 isCriticalA
                   ? 'border-red-500 bg-red-950/90 text-red-100 shadow-[0_0_12px_rgba(239,68,68,0.5)]'
@@ -71,9 +71,7 @@ export const RiskZonesVisualizer: React.FC = () => {
         </group>
       )}
 
-      {/* ========================================================
-          ZONE B: EAST WING (SAFE ACCESS EGRESS)
-         ======================================================== */}
+      {/* ZONE B: EAST WING */}
       {zoneB && (
         <group position={zoneB.center} onClick={(e) => { e.stopPropagation(); setSelected('ZONE_B'); }}>
           <mesh>
@@ -90,9 +88,9 @@ export const RiskZonesVisualizer: React.FC = () => {
             <lineBasicMaterial color="#10b981" />
           </lineSegments>
 
-          {/* Compact Floating Label */}
+          {/* Reactive Scaled HUD Label */}
           {showLabels && (
-            <Html position={[0, zoneB.size[1] / 2 + 0.35, 0]} center distanceFactor={28}>
+            <Html position={[0, zoneB.size[1] / 2 + 0.35, 0]} center distanceFactor={dynamicDistanceFactor}>
               <div className="pointer-events-none select-none border border-emerald-500/70 bg-slate-900/90 text-emerald-200 rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[120px] shadow-[0_0_10px_rgba(16,185,129,0.2)]">
                 <div className="flex items-center justify-between gap-1.5 border-b border-white/10 pb-0.5">
                   <span className="font-bold tracking-wider flex items-center gap-1">
@@ -113,9 +111,7 @@ export const RiskZonesVisualizer: React.FC = () => {
         </group>
       )}
 
-      {/* ========================================================
-          SURVIVOR PROBABILITY ZONE (BASEMENT CAVITY B-2)
-         ======================================================== */}
+      {/* SURVIVOR PROBABILITY ZONE */}
       {survivorZone && (
         <group position={survivorZone.center} onClick={(e) => { e.stopPropagation(); setSelected('SURVIVOR_ZONE'); }}>
           <mesh>
@@ -132,9 +128,9 @@ export const RiskZonesVisualizer: React.FC = () => {
             <lineBasicMaterial color="#00f0ff" />
           </lineSegments>
 
-          {/* Compact Floating Tag */}
+          {/* Reactive Scaled HUD Label */}
           {showLabels && (
-            <Html position={[0, survivorZone.size[1] / 2 + 0.3, 0]} center distanceFactor={28}>
+            <Html position={[0, survivorZone.size[1] / 2 + 0.3, 0]} center distanceFactor={dynamicDistanceFactor}>
               <div className="pointer-events-none select-none border border-cyan-400 bg-slate-900/95 text-cyan-200 rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[130px] shadow-[0_0_12px_rgba(0,240,255,0.3)]">
                 <div className="flex items-center justify-between gap-1.5 border-b border-white/10 pb-0.5">
                   <span className="font-bold tracking-wider flex items-center gap-1 text-cyan-300">

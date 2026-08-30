@@ -17,8 +17,11 @@ export const QuadcopterDrone: React.FC = () => {
 
   const droneState = useRescueTwinStore((s) => s.telemetry.drone);
   const showLabels = useRescueTwinStore((s) => s.digitalTwin.show3DLabels);
+  const zoomDist = useRescueTwinStore((s) => s.cameraZoomDistance);
   const isScanning = droneState.status === 'SCANNING';
   const setSelected = useRescueTwinStore((s) => s.setSelectedElement);
+
+  const dynamicDistanceFactor = Math.max(16, Math.min(38, zoomDist * 1.15));
 
   // Simulated LiDAR point cloud particles
   const particleCount = 120;
@@ -55,7 +58,6 @@ export const QuadcopterDrone: React.FC = () => {
         const y = 8.5 + Math.sin(t * 2.0) * 1.2;
         droneGroupRef.current.position.set(x, y, z);
         droneGroupRef.current.rotation.y = t * speed + Math.PI / 2;
-        // Banking tilt into the turn
         droneGroupRef.current.rotation.z = Math.sin(t * speed) * 0.15;
         droneGroupRef.current.rotation.x = Math.cos(t * speed) * 0.15;
       } else {
@@ -155,7 +157,6 @@ export const QuadcopterDrone: React.FC = () => {
       {/* Dynamic Full 360-Degree LiDAR Scanning Cones & Laser Mesh */}
       {isScanning && (
         <group position={[0, -0.2, 0]}>
-          {/* Main wireframe laser cone */}
           <mesh ref={scanConeRef} position={[0, -3.8, 0]}>
             <cylinderGeometry args={[0.1, 4.2, 7.6, 18, 8, true]} />
             <meshBasicMaterial
@@ -167,13 +168,11 @@ export const QuadcopterDrone: React.FC = () => {
             />
           </mesh>
 
-          {/* Sweeping Laser Depth Ring */}
           <mesh ref={sweepRingRef} rotation={[-Math.PI / 2, 0, 0]}>
             <ringGeometry args={[1.5, 1.8, 32]} />
             <meshBasicMaterial color="#38bdf8" transparent opacity={0.7} side={THREE.DoubleSide} />
           </mesh>
 
-          {/* Point Cloud Ingested Particles */}
           <points ref={pointCloudRef} geometry={particleGeo}>
             <pointsMaterial color="#22d3ee" size={0.12} transparent opacity={0.8} />
           </points>
@@ -182,9 +181,9 @@ export const QuadcopterDrone: React.FC = () => {
         </group>
       )}
 
-      {/* Compact Floating 3D Telemetry Label */}
+      {/* Reactive Compact Floating 3D Telemetry Label */}
       {showLabels && (
-        <Html position={[0, 0.6, 0]} center distanceFactor={28}>
+        <Html position={[0, 0.6, 0]} center distanceFactor={dynamicDistanceFactor}>
           <div className="pointer-events-none select-none border border-cyan-500/80 bg-slate-900/95 text-cyan-200 px-2 py-1 rounded backdrop-blur-md text-[10px] font-mono whitespace-nowrap flex items-center gap-1.5 shadow-[0_0_12px_rgba(0,240,255,0.4)]">
             <Plane className="w-3 h-3 text-cyan-400" />
             <span className="font-bold">DRONE-01</span>

@@ -242,7 +242,7 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
   is3DFullscreen: false,
   soundEnabled: true,
   activePipFeed: 'ROBOT_FLIR',
-  cameraZoomDistance: 24, // Default camera orbit distance
+  cameraZoomDistance: 24,
   inspectorDrawerOpen: false,
   inspectorTargetId: null,
 
@@ -295,7 +295,7 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
     activeZones: initialZones,
     cameraPreset: 'COMMAND',
     arMode: false,
-    show3DLabels: true,
+    show3DLabels: false, // Default: labels OFF at start
     wireframeOverlay: false,
     stressHeatmapVisible: true,
     selectedElementId: null,
@@ -350,7 +350,6 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
     const clamped = Math.max(0, Math.min(45, tSec));
 
     if (clamped < 6) {
-      // 0-5s: Intact Baseline
       set((state) => ({
         timelineSec: clamped,
         systemStatus: 'OPERATIONAL',
@@ -369,7 +368,6 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
         routes: calculateOptimalRescueRoutes(31, 29, 14).routes,
       }));
     } else if (clamped < 12) {
-      // 6-11s: Drone LiDAR Scan
       set((state) => ({
         timelineSec: clamped,
         systemStatus: 'OPERATIONAL',
@@ -383,7 +381,6 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
         digitalTwin: { ...state.digitalTwin, collapseStage: 0, buildingIntegrityPct: 92 },
       }));
     } else if (clamped < 20) {
-      // 12-19s: Earthquake Progressive Spike & Collapse Stage 1
       const p = (clamped - 12) / 8;
       const vib = 4.8 + p * (8.7 - 4.8);
       const disp = 2.4 + p * (6.8 - 2.4);
@@ -408,7 +405,6 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
         routes: calculateOptimalRescueRoutes(risk, 29, 14).routes,
       }));
     } else if (clamped < 28) {
-      // 20-27s: Flash Flood Inundation & Ground Collapse Stage 2
       const p = (clamped - 20) / 8;
       const water = p * 1.85;
       const flow = p * 3.4;
@@ -437,7 +433,6 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
         aiEngine: { ...state.aiEngine, structuralRiskPct: 92 },
       }));
     } else if (clamped < 36) {
-      // 28-35s: Robot Traversal & FLIR Thermal Discovery
       set((state) => ({
         timelineSec: clamped,
         systemStatus: 'CRITICAL_HAZARD',
@@ -457,14 +452,12 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
         aiEngine: { ...state.aiEngine, victimProbabilityPct: 91 },
       }));
     } else if (clamped < 42) {
-      // 36-41s: AR Responder HUD Mode
       set((state) => ({
         timelineSec: clamped,
         digitalTwin: { ...state.digitalTwin, arMode: true },
         printing: { ...state.printing, status: 'PRINTING', progress: 65 },
       }));
     } else {
-      // 42-45s: 3D Tool Printed & Mounted
       set((state) => ({
         timelineSec: clamped,
         digitalTwin: { ...state.digitalTwin, arMode: true },
@@ -597,7 +590,7 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
     }
   },
 
-  // FULL 360-DEGREE MULTI-SECTOR DRONE SCANNING SEQUENCE (0 -> 25 -> 50 -> 75 -> 100%)
+  // FULL 360-DEGREE MULTI-SECTOR DRONE SCANNING SEQUENCE
   triggerDroneScan: () => {
     sound.playRadarSweep();
     const now = formatMissionTime(get().missionTimeSec);
@@ -631,7 +624,6 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
       ],
     }));
 
-    // Step 1 (1.0s): Sector North 35%
     setTimeout(() => {
       sound.playRadarSweep();
       set((state) => ({
@@ -645,7 +637,6 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
       }));
     }, 1000);
 
-    // Step 2 (2.2s): Sector East & Shear Wall 65%
     setTimeout(() => {
       sound.playRadarSweep();
       set((state) => ({
@@ -659,7 +650,6 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
       }));
     }, 2200);
 
-    // Step 3 (3.4s): Sector South & Roof 88%
     setTimeout(() => {
       sound.playRadarSweep();
       set((state) => ({
@@ -673,7 +663,6 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
       }));
     }, 3400);
 
-    // Step 4 (4.5s): 100% Full Scan Complete & Point Cloud Ingested
     setTimeout(() => {
       sound.playSuccess();
       const updatedTime = formatMissionTime(get().missionTimeSec);
@@ -712,7 +701,7 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
     }, 4500);
   },
 
-  // PROGRESSIVE 3-SECOND SENSOR SPIKE & EARTHQUAKE COLLAPSE
+  // SENSOR SPIKE
   triggerSensorSpike: () => {
     sound.playAlert();
     const now = formatMissionTime(get().missionTimeSec);
@@ -836,7 +825,7 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
     }, 3000);
   },
 
-  // PROGRESSIVE 3-SECOND FLASH FLOOD SURGE & GROUND COLLAPSE
+  // FLASH FLOOD
   triggerFlashFlood: () => {
     sound.playAlert();
     const now = formatMissionTime(get().missionTimeSec);
@@ -1122,7 +1111,7 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
     });
   },
 
-  // RESET MISSION
+  // RESET MISSION (Defaults labels to OFF)
   resetMission: () => {
     get().demoTimerIds.forEach((t) => clearTimeout(t));
 
@@ -1186,7 +1175,7 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
         activeZones: initialZones,
         cameraPreset: 'COMMAND',
         arMode: false,
-        show3DLabels: true,
+        show3DLabels: false, // Default labels OFF on reset
         wireframeOverlay: false,
         stressHeatmapVisible: true,
         selectedElementId: null,
