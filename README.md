@@ -2,10 +2,18 @@
 ### Autonomous Disaster Digital Twin for Intelligent Rescue Operations
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2FRajkishore08%2FRescuetwin_ARCSS)
+[![Project Pitch Deck](https://img.shields.io/badge/Canva-Project%20Pitch%20Deck-00C4CC?style=flat&logo=canva&logoColor=white)](https://canva.link/eq7jq85dahr7hj1)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.2-cyan.svg)](https://reactjs.org/)
 [![Three.js](https://img.shields.io/badge/Three.js-r182-black.svg)](https://threejs.org/)
 [![Vite](https://img.shields.io/badge/Vite-8.2-purple.svg)](https://vitejs.dev/)
+
+---
+
+## 🎨 Project Concept & Pitch Presentation
+
+> 📊 **Explore the Full Project Pitch & Idea Deck on Canva:**  
+> **👉 [View RescueTwin Pitch Deck](https://canva.link/eq7jq85dahr7hj1)**
 
 ---
 
