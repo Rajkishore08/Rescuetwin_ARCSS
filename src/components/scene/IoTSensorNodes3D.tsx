@@ -63,8 +63,8 @@ export const IoTSensorNodes3D: React.FC = () => {
             {/* Point light for spatial illumination */}
             <pointLight color={color} intensity={isCritical ? 2.0 : 0.6} distance={2.5} />
 
-            {/* Compact Reactive Technical Tooltip Tag */}
-            {showLabels && (
+            {/* Compact Reactive Technical Tooltip Tag - Shown if global labels ON OR individually clicked */}
+            {(showLabels || isSelected) && (
               <Html position={[0, 0.25, 0]} center distanceFactor={dynamicDistanceFactor}>
                 <div className={`pointer-events-none select-none border rounded px-1.5 py-0.5 backdrop-blur-md text-[9px] font-mono whitespace-nowrap flex items-center gap-1 transition-all ${
                   isCritical
@@ -72,7 +72,7 @@ export const IoTSensorNodes3D: React.FC = () => {
                     : isWarning
                     ? 'border-amber-500/80 bg-slate-900/90 text-amber-200'
                     : 'border-cyan-500/50 bg-slate-900/80 text-cyan-200'
-                } ${isSelected ? 'ring-1 ring-cyan-400' : ''}`}>
+                } ${isSelected ? 'ring-2 ring-cyan-400 shadow-[0_0_15px_rgba(0,240,255,0.7)] scale-110' : ''}`}>
                   <span className={isCritical ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-cyan-400'}>
                     {getIcon()}
                   </span>

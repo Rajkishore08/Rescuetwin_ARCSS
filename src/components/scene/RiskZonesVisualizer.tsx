@@ -8,6 +8,7 @@ export const RiskZonesVisualizer: React.FC = () => {
   const zones = useRescueTwinStore((s) => s.digitalTwin.activeZones);
   const arMode = useRescueTwinStore((s) => s.digitalTwin.arMode);
   const showLabels = useRescueTwinStore((s) => s.digitalTwin.show3DLabels);
+  const selectedElement = useRescueTwinStore((s) => s.digitalTwin.selectedElementId);
   const zoomDist = useRescueTwinStore((s) => s.cameraZoomDistance);
   const aiEngine = useRescueTwinStore((s) => s.aiEngine);
   const robotStatus = useRescueTwinStore((s) => s.telemetry.robot.status);
@@ -18,6 +19,10 @@ export const RiskZonesVisualizer: React.FC = () => {
   const survivorZone = zones.SURVIVOR_ZONE;
 
   const isCriticalA = zoneA?.riskPct > 60;
+  const isSelectedA = selectedElement === 'ZONE_A';
+  const isSelectedB = selectedElement === 'ZONE_B';
+  const isSelectedSurvivor = selectedElement === 'SURVIVOR_ZONE';
+
   // Reactive distance factor based on camera zoom distance
   const dynamicDistanceFactor = Math.max(16, Math.min(38, zoomDist * 1.15));
 
@@ -31,23 +36,23 @@ export const RiskZonesVisualizer: React.FC = () => {
             <meshStandardMaterial
               color={isCriticalA ? '#ef4444' : '#eab308'}
               transparent
-              opacity={arMode ? 0.35 : 0.15}
+              opacity={isSelectedA ? 0.45 : arMode ? 0.35 : 0.15}
               depthWrite={false}
             />
           </mesh>
           <lineSegments>
             <edgesGeometry args={[new THREE.BoxGeometry(...zoneA.size)]} />
-            <lineBasicMaterial color={isCriticalA ? '#ef4444' : '#eab308'} />
+            <lineBasicMaterial color={isSelectedA ? '#00f0ff' : isCriticalA ? '#ef4444' : '#eab308'} />
           </lineSegments>
 
-          {/* Reactive Scaled HUD Label */}
-          {showLabels && (
+          {/* Reactive Scaled HUD Label - Shown if global labels ON OR individually clicked */}
+          {(showLabels || isSelectedA) && (
             <Html position={[0, zoneA.size[1] / 2 + 0.35, 0]} center distanceFactor={dynamicDistanceFactor}>
               <div className={`pointer-events-none select-none transition-all duration-300 ${
                 isCriticalA
                   ? 'border-red-500 bg-red-950/90 text-red-100 shadow-[0_0_12px_rgba(239,68,68,0.5)]'
                   : 'border-amber-500/80 bg-slate-900/90 text-amber-200'
-              } border rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[130px]`}>
+              } ${isSelectedA ? 'ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.6)]' : ''} border rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[130px]`}>
                 <div className="flex items-center justify-between gap-1.5 border-b border-white/10 pb-0.5">
                   <span className="font-bold tracking-wider flex items-center gap-1">
                     <AlertTriangle className={`w-3 h-3 ${isCriticalA ? 'text-red-400 animate-pulse' : 'text-amber-400'}`} />
@@ -79,19 +84,21 @@ export const RiskZonesVisualizer: React.FC = () => {
             <meshStandardMaterial
               color="#10b981"
               transparent
-              opacity={arMode ? 0.28 : 0.12}
+              opacity={isSelectedB ? 0.4 : arMode ? 0.28 : 0.12}
               depthWrite={false}
             />
           </mesh>
           <lineSegments>
             <edgesGeometry args={[new THREE.BoxGeometry(...zoneB.size)]} />
-            <lineBasicMaterial color="#10b981" />
+            <lineBasicMaterial color={isSelectedB ? '#00f0ff' : '#10b981'} />
           </lineSegments>
 
-          {/* Reactive Scaled HUD Label */}
-          {showLabels && (
+          {/* Reactive Scaled HUD Label - Shown if global labels ON OR individually clicked */}
+          {(showLabels || isSelectedB) && (
             <Html position={[0, zoneB.size[1] / 2 + 0.35, 0]} center distanceFactor={dynamicDistanceFactor}>
-              <div className="pointer-events-none select-none border border-emerald-500/70 bg-slate-900/90 text-emerald-200 rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[120px] shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+              <div className={`pointer-events-none select-none border border-emerald-500/70 bg-slate-900/90 text-emerald-200 rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[120px] shadow-[0_0_10px_rgba(16,185,129,0.2)] ${
+                isSelectedB ? 'ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.6)]' : ''
+              }`}>
                 <div className="flex items-center justify-between gap-1.5 border-b border-white/10 pb-0.5">
                   <span className="font-bold tracking-wider flex items-center gap-1">
                     <ShieldCheck className="w-3 h-3 text-emerald-400" />
@@ -119,19 +126,21 @@ export const RiskZonesVisualizer: React.FC = () => {
             <meshStandardMaterial
               color="#00f0ff"
               transparent
-              opacity={0.2}
+              opacity={isSelectedSurvivor ? 0.35 : 0.2}
               depthWrite={false}
             />
           </mesh>
           <lineSegments>
             <edgesGeometry args={[new THREE.BoxGeometry(...survivorZone.size)]} />
-            <lineBasicMaterial color="#00f0ff" />
+            <lineBasicMaterial color={isSelectedSurvivor ? '#ffffff' : '#00f0ff'} />
           </lineSegments>
 
-          {/* Reactive Scaled HUD Label */}
-          {showLabels && (
+          {/* Reactive Scaled HUD Label - Shown if global labels ON OR individually clicked */}
+          {(showLabels || isSelectedSurvivor) && (
             <Html position={[0, survivorZone.size[1] / 2 + 0.3, 0]} center distanceFactor={dynamicDistanceFactor}>
-              <div className="pointer-events-none select-none border border-cyan-400 bg-slate-900/95 text-cyan-200 rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[130px] shadow-[0_0_12px_rgba(0,240,255,0.3)]">
+              <div className={`pointer-events-none select-none border border-cyan-400 bg-slate-900/95 text-cyan-200 rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[130px] shadow-[0_0_12px_rgba(0,240,255,0.3)] ${
+                isSelectedSurvivor ? 'ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.6)]' : ''
+              }`}>
                 <div className="flex items-center justify-between gap-1.5 border-b border-white/10 pb-0.5">
                   <span className="font-bold tracking-wider flex items-center gap-1 text-cyan-300">
                     <UserCheck className="w-3 h-3 text-cyan-400" />

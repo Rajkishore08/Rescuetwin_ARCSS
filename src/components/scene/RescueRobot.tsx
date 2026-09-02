@@ -9,10 +9,12 @@ export const RescueRobot: React.FC = () => {
   const robotRef = useRef<THREE.Group>(null);
   const robotState = useRescueTwinStore((s) => s.telemetry.robot);
   const showLabels = useRescueTwinStore((s) => s.digitalTwin.show3DLabels);
+  const selectedElement = useRescueTwinStore((s) => s.digitalTwin.selectedElementId);
   const zoomDist = useRescueTwinStore((s) => s.cameraZoomDistance);
   const setSelected = useRescueTwinStore((s) => s.setSelectedElement);
   const isPrintingDeployed = useRescueTwinStore((s) => s.printing.status === 'DEPLOYED');
 
+  const isSelected = selectedElement === 'ROBOT';
   const dynamicDistanceFactor = Math.max(16, Math.min(38, zoomDist * 1.15));
 
   useFrame(() => {
@@ -124,10 +126,12 @@ export const RescueRobot: React.FC = () => {
       {/* Headlights */}
       <pointLight position={[0, 0.25, 0.6]} color="#ffffff" intensity={2} distance={5} />
 
-      {/* Reactive Compact Floating 3D Telemetry Label */}
-      {showLabels && (
+      {/* Reactive Compact Floating 3D Telemetry Label - Shown if global labels ON OR individually clicked */}
+      {(showLabels || isSelected) && (
         <Html position={[0, 0.65, 0]} center distanceFactor={dynamicDistanceFactor}>
-          <div className="pointer-events-none select-none border border-emerald-500/80 bg-slate-900/90 text-emerald-200 px-2 py-0.8 rounded backdrop-blur-md text-[10px] font-mono whitespace-nowrap flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.25)]">
+          <div className={`pointer-events-none select-none border border-emerald-500/80 bg-slate-900/90 text-emerald-200 px-2 py-0.8 rounded backdrop-blur-md text-[10px] font-mono whitespace-nowrap flex items-center gap-1.5 shadow-[0_0_10px_rgba(16,185,129,0.25)] ${
+            isSelected ? 'ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.7)] scale-110' : ''
+          }`}>
             <Bot className="w-3 h-3 text-emerald-400" />
             <span className="font-bold">ROBOT-01</span>
             <span className="text-slate-400">|</span>

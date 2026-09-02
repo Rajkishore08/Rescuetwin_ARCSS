@@ -92,8 +92,8 @@ export const RescueRoutesSplines: React.FC = () => {
               </mesh>
             ))}
 
-            {/* Reactive Floating Route HUD Tag */}
-            {showLabels && (
+            {/* Reactive Floating Route HUD Tag - Shown if global labels ON OR individually clicked */}
+            {(showLabels || isSelected) && (
               <Html position={[midPoint.x, midPoint.y + 0.4, midPoint.z]} center distanceFactor={dynamicDistanceFactor}>
                 <div className={`pointer-events-none select-none border rounded px-1.5 py-0.5 backdrop-blur-md text-[9px] font-mono whitespace-nowrap flex items-center gap-1 transition-all ${
                   isRejected
@@ -101,7 +101,7 @@ export const RescueRoutesSplines: React.FC = () => {
                     : isRecommended
                     ? 'border-emerald-400 bg-slate-900/95 text-emerald-200 shadow-[0_0_12px_rgba(16,185,129,0.4)] ring-1 ring-emerald-400/50'
                     : 'border-amber-500/70 bg-slate-900/90 text-amber-200'
-                } ${isSelected ? 'ring-1 ring-cyan-400' : ''}`}>
+                } ${isSelected ? 'ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.7)] scale-110' : ''}`}>
                   <Navigation className="w-2.5 h-2.5" />
                   <span className="font-bold">ROUTE {route.id}</span>
                   <span className="text-slate-400">|</span>
