@@ -39,6 +39,17 @@ export const IoTSensorNodes3D: React.FC = () => {
               setSelected(sensor.id);
             }}
           >
+            {/* Invisible expanded click hitbox for effortless tap */}
+            <mesh
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelected(sensor.id);
+              }}
+            >
+              <sphereGeometry args={[0.35, 8, 8]} />
+              <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+            </mesh>
+
             {/* Core glowing sensor beacon */}
             <mesh>
               <sphereGeometry args={[0.1, 16, 16]} />

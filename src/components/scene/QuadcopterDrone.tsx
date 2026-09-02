@@ -91,6 +91,17 @@ export const QuadcopterDrone: React.FC = () => {
         setSelected('DRONE');
       }}
     >
+      {/* Invisible expanded click hitbox for effortless selection */}
+      <mesh
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelected('DRONE');
+        }}
+      >
+        <sphereGeometry args={[1.4, 8, 8]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+
       {/* Central Drone Chassis */}
       <mesh castShadow>
         <boxGeometry args={[0.6, 0.14, 0.6]} />

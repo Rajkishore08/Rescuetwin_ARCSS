@@ -30,29 +30,55 @@ export const RiskZonesVisualizer: React.FC = () => {
     <group>
       {/* ZONE A: NORTH SECTION */}
       {zoneA && (
-        <group position={zoneA.center} onClick={(e) => { e.stopPropagation(); setSelected('ZONE_A'); }}>
-          <mesh>
+        <group position={zoneA.center}>
+          {/* Volumetric zone box - raycast=null so clicks pass through to building, sensors, drone, robot */}
+          <mesh raycast={() => null}>
             <boxGeometry args={zoneA.size} />
             <meshStandardMaterial
               color={isCriticalA ? '#ef4444' : '#eab308'}
               transparent
-              opacity={isSelectedA ? 0.45 : arMode ? 0.35 : 0.15}
+              opacity={isSelectedA ? 0.4 : arMode ? 0.35 : 0.15}
               depthWrite={false}
             />
           </mesh>
-          <lineSegments>
+          {/* Wireframe border outline */}
+          <lineSegments raycast={() => null}>
             <edgesGeometry args={[new THREE.BoxGeometry(...zoneA.size)]} />
             <lineBasicMaterial color={isSelectedA ? '#00f0ff' : isCriticalA ? '#ef4444' : '#eab308'} />
           </lineSegments>
 
+          {/* Clickable Ground Footprint Ring for Zone selection without blocking building */}
+          <mesh
+            position={[0, -zoneA.size[1] / 2 + 0.04, 0]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelected('ZONE_A');
+            }}
+          >
+            <ringGeometry args={[0.8, 1.4, 16]} />
+            <meshBasicMaterial
+              color={isSelectedA ? '#00f0ff' : isCriticalA ? '#ef4444' : '#eab308'}
+              transparent
+              opacity={0.6}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+
           {/* Reactive Scaled HUD Label - Shown if global labels ON OR individually clicked */}
           {(showLabels || isSelectedA) && (
             <Html position={[0, zoneA.size[1] / 2 + 0.35, 0]} center distanceFactor={dynamicDistanceFactor}>
-              <div className={`pointer-events-none select-none transition-all duration-300 ${
-                isCriticalA
-                  ? 'border-red-500 bg-red-950/90 text-red-100 shadow-[0_0_12px_rgba(239,68,68,0.5)]'
-                  : 'border-amber-500/80 bg-slate-900/90 text-amber-200'
-              } ${isSelectedA ? 'ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.6)]' : ''} border rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[130px]`}>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelected('ZONE_A');
+                }}
+                className={`cursor-pointer select-none transition-all duration-300 ${
+                  isCriticalA
+                    ? 'border-red-500 bg-red-950/90 text-red-100 shadow-[0_0_12px_rgba(239,68,68,0.5)]'
+                    : 'border-amber-500/80 bg-slate-900/90 text-amber-200'
+                } ${isSelectedA ? 'ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.6)]' : ''} border rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[130px]`}
+              >
                 <div className="flex items-center justify-between gap-1.5 border-b border-white/10 pb-0.5">
                   <span className="font-bold tracking-wider flex items-center gap-1">
                     <AlertTriangle className={`w-3 h-3 ${isCriticalA ? 'text-red-400 animate-pulse' : 'text-amber-400'}`} />
@@ -78,27 +104,52 @@ export const RiskZonesVisualizer: React.FC = () => {
 
       {/* ZONE B: EAST WING */}
       {zoneB && (
-        <group position={zoneB.center} onClick={(e) => { e.stopPropagation(); setSelected('ZONE_B'); }}>
-          <mesh>
+        <group position={zoneB.center}>
+          {/* Volumetric zone box - raycast=null so clicks pass through */}
+          <mesh raycast={() => null}>
             <boxGeometry args={zoneB.size} />
             <meshStandardMaterial
               color="#10b981"
               transparent
-              opacity={isSelectedB ? 0.4 : arMode ? 0.28 : 0.12}
+              opacity={isSelectedB ? 0.35 : arMode ? 0.28 : 0.12}
               depthWrite={false}
             />
           </mesh>
-          <lineSegments>
+          <lineSegments raycast={() => null}>
             <edgesGeometry args={[new THREE.BoxGeometry(...zoneB.size)]} />
             <lineBasicMaterial color={isSelectedB ? '#00f0ff' : '#10b981'} />
           </lineSegments>
 
+          {/* Clickable Ground Footprint Ring for Zone selection without blocking building */}
+          <mesh
+            position={[0, -zoneB.size[1] / 2 + 0.04, 0]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelected('ZONE_B');
+            }}
+          >
+            <ringGeometry args={[0.8, 1.4, 16]} />
+            <meshBasicMaterial
+              color={isSelectedB ? '#00f0ff' : '#10b981'}
+              transparent
+              opacity={0.6}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+
           {/* Reactive Scaled HUD Label - Shown if global labels ON OR individually clicked */}
           {(showLabels || isSelectedB) && (
             <Html position={[0, zoneB.size[1] / 2 + 0.35, 0]} center distanceFactor={dynamicDistanceFactor}>
-              <div className={`pointer-events-none select-none border border-emerald-500/70 bg-slate-900/90 text-emerald-200 rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[120px] shadow-[0_0_10px_rgba(16,185,129,0.2)] ${
-                isSelectedB ? 'ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.6)]' : ''
-              }`}>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelected('ZONE_B');
+                }}
+                className={`cursor-pointer select-none border border-emerald-500/70 bg-slate-900/90 text-emerald-200 rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[120px] shadow-[0_0_10px_rgba(16,185,129,0.2)] ${
+                  isSelectedB ? 'ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.6)]' : ''
+                }`}
+              >
                 <div className="flex items-center justify-between gap-1.5 border-b border-white/10 pb-0.5">
                   <span className="font-bold tracking-wider flex items-center gap-1">
                     <ShieldCheck className="w-3 h-3 text-emerald-400" />
@@ -120,8 +171,8 @@ export const RiskZonesVisualizer: React.FC = () => {
 
       {/* SURVIVOR PROBABILITY ZONE */}
       {survivorZone && (
-        <group position={survivorZone.center} onClick={(e) => { e.stopPropagation(); setSelected('SURVIVOR_ZONE'); }}>
-          <mesh>
+        <group position={survivorZone.center}>
+          <mesh raycast={() => null}>
             <boxGeometry args={survivorZone.size} />
             <meshStandardMaterial
               color="#00f0ff"
@@ -130,17 +181,41 @@ export const RiskZonesVisualizer: React.FC = () => {
               depthWrite={false}
             />
           </mesh>
-          <lineSegments>
+          <lineSegments raycast={() => null}>
             <edgesGeometry args={[new THREE.BoxGeometry(...survivorZone.size)]} />
             <lineBasicMaterial color={isSelectedSurvivor ? '#ffffff' : '#00f0ff'} />
           </lineSegments>
 
+          {/* Clickable Ground Marker for Survivor Zone */}
+          <mesh
+            position={[0, -survivorZone.size[1] / 2 + 0.04, 0]}
+            rotation={[-Math.PI / 2, 0, 0]}
+            onClick={(e) => {
+              e.stopPropagation();
+              setSelected('SURVIVOR_ZONE');
+            }}
+          >
+            <ringGeometry args={[0.5, 1.0, 16]} />
+            <meshBasicMaterial
+              color={isSelectedSurvivor ? '#00f0ff' : '#38bdf8'}
+              transparent
+              opacity={0.6}
+              side={THREE.DoubleSide}
+            />
+          </mesh>
+
           {/* Reactive Scaled HUD Label - Shown if global labels ON OR individually clicked */}
           {(showLabels || isSelectedSurvivor) && (
             <Html position={[0, survivorZone.size[1] / 2 + 0.3, 0]} center distanceFactor={dynamicDistanceFactor}>
-              <div className={`pointer-events-none select-none border border-cyan-400 bg-slate-900/95 text-cyan-200 rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[130px] shadow-[0_0_12px_rgba(0,240,255,0.3)] ${
-                isSelectedSurvivor ? 'ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.6)]' : ''
-              }`}>
+              <div
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setSelected('SURVIVOR_ZONE');
+                }}
+                className={`cursor-pointer select-none border border-cyan-400 bg-slate-900/95 text-cyan-200 rounded px-2 py-1 backdrop-blur-md whitespace-nowrap text-[10px] font-mono flex flex-col gap-0.5 min-w-[130px] shadow-[0_0_12px_rgba(0,240,255,0.3)] ${
+                  isSelectedSurvivor ? 'ring-2 ring-cyan-400 shadow-[0_0_20px_rgba(0,240,255,0.6)]' : ''
+                }`}
+              >
                 <div className="flex items-center justify-between gap-1.5 border-b border-white/10 pb-0.5">
                   <span className="font-bold tracking-wider flex items-center gap-1 text-cyan-300">
                     <UserCheck className="w-3 h-3 text-cyan-400" />

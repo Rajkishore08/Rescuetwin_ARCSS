@@ -39,6 +39,17 @@ export const RescueRobot: React.FC = () => {
         setSelected('ROBOT');
       }}
     >
+      {/* Invisible expanded click hitbox for effortless selection */}
+      <mesh
+        onClick={(e) => {
+          e.stopPropagation();
+          setSelected('ROBOT');
+        }}
+      >
+        <boxGeometry args={[1.5, 1.2, 1.5]} />
+        <meshBasicMaterial transparent opacity={0} depthWrite={false} />
+      </mesh>
+
       {/* Main Tracked Chassis */}
       <mesh position={[0, 0.15, 0]} castShadow>
         <boxGeometry args={[0.7, 0.25, 0.9]} />

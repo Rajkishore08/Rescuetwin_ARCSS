@@ -56,6 +56,14 @@ export const TacticalInspectorDrawer: React.FC = () => {
       };
     }
 
+    if (targetId === 'BUILDING') {
+      return {
+        title: 'MAIN COMMERCIAL COMPLEX // 5-STOREY STRUCTURAL INTEGRITY',
+        subtitle: 'Finite Element Analysis & Multi-Storey Collapse Telemetry',
+        category: 'STRUCTURAL DIGITAL TWIN',
+      };
+    }
+
     if (targetId.startsWith('ZONE_')) {
       const zone = zones[targetId];
       return {
