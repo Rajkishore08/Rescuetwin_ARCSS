@@ -14,6 +14,7 @@ import {
 export const TacticalPipCamera: React.FC = () => {
   const activePipFeed = useRescueTwinStore((s) => s.activePipFeed);
   const setPipFeed = useRescueTwinStore((s) => s.setPipFeed);
+  const setCameraPreset = useRescueTwinStore((s) => s.setCameraPreset);
   const telemetry = useRescueTwinStore((s) => s.telemetry);
 
   const [zoom, setZoom] = useState<'1X' | '2X' | '4X'>('1X');
@@ -51,6 +52,15 @@ export const TacticalPipCamera: React.FC = () => {
         </div>
 
         <div className="flex items-center gap-1">
+          {/* 3D POV Shortcut Button */}
+          <button
+            onClick={() => setCameraPreset('ROBOT_POV')}
+            className="px-1.5 py-0.5 rounded bg-emerald-950 hover:bg-emerald-900 text-emerald-300 text-[9px] border border-emerald-700 font-bold transition-colors"
+            title="Switch Main 3D Canvas to Robot First-Person POV"
+          >
+            3D POV
+          </button>
+
           {/* Feed Switcher Button */}
           <button
             onClick={() =>

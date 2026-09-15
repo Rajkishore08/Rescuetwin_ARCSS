@@ -5,6 +5,7 @@ import { DigitalTwinCanvas } from './components/scene/DigitalTwinCanvas';
 import { AIEngineRightPanel } from './components/ai/AIEngineRightPanel';
 import { BottomControlBar } from './components/status/BottomControlBar';
 import { ArchitectureModal } from './components/modals/ArchitectureModal';
+import { UserGuideModal } from './components/modals/UserGuideModal';
 import { TacticalInspectorDrawer } from './components/inspector/TacticalInspectorDrawer';
 import { TacticalPipCamera } from './components/camera/TacticalPipCamera';
 import { useRescueTwinStore } from './state/rescueTwinStore';
@@ -57,8 +58,9 @@ export const App: React.FC = () => {
       {/* 3. BOTTOM CONTROL BAR: Timeline Scrubber, Closed Loop Cycle & 7 Tech Status */}
       <BottomControlBar />
 
-      {/* 4. ARCHITECTURAL & TECHNICAL MODAL */}
+      {/* 4. ARCHITECTURAL & USER GUIDE MODALS */}
       <ArchitectureModal />
+      <UserGuideModal />
 
       {/* 5. TACTICAL DEEP-DIVE INSPECTOR DRAWER */}
       <TacticalInspectorDrawer />

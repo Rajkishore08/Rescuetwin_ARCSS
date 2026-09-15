@@ -19,6 +19,7 @@ export interface RescueTwinStore {
   demoStepIndex: number;
   isInterviewMode: boolean;
   architectureModalOpen: boolean;
+  guideModalOpen: boolean;
   is3DFullscreen: boolean;
   soundEnabled: boolean;
   activePipFeed: PipFeedType;
@@ -50,6 +51,7 @@ export interface RescueTwinStore {
   toggle3DFullscreen: () => void;
   toggleInterviewMode: () => void;
   setArchitectureModal: (open: boolean) => void;
+  setGuideModalOpen: (open: boolean) => void;
   setInspectorDrawer: (open: boolean, targetId?: string | null) => void;
   setCameraPreset: (preset: CameraPreset) => void;
   setSelectedElement: (id: string | null) => void;
@@ -239,6 +241,7 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
   demoStepIndex: 0,
   isInterviewMode: false,
   architectureModalOpen: false,
+  guideModalOpen: false,
   is3DFullscreen: false,
   soundEnabled: true,
   activePipFeed: 'ROBOT_FLIR',
@@ -493,6 +496,11 @@ export const useRescueTwinStore = create<RescueTwinStore>((set, get) => ({
 
   setArchitectureModal: (open: boolean) => {
     set({ architectureModalOpen: open });
+  },
+
+  setGuideModalOpen: (open: boolean) => {
+    sound.playClick();
+    set({ guideModalOpen: open });
   },
 
   setInspectorDrawer: (open: boolean, targetId?: string | null) => {

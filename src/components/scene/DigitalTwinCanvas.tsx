@@ -21,6 +21,7 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
+  Flame,
 } from 'lucide-react';
 
 export const DigitalTwinCanvas: React.FC = () => {
@@ -233,20 +234,98 @@ export const DigitalTwinCanvas: React.FC = () => {
         <div className="h-4 w-[1px] bg-slate-700 mx-0.5" />
 
         <span className="text-[10px] font-mono text-slate-400 px-1 font-semibold">VIEW:</span>
-        {(['COMMAND', 'AERIAL', 'BUILDING', 'ROBOT'] as const).map((preset) => (
+        {(['COMMAND', 'AERIAL', 'BUILDING', 'ROBOT', 'ROBOT_POV'] as const).map((preset) => (
           <button
             key={preset}
             onClick={() => setCameraPreset(preset)}
             className={`px-2.5 py-1 rounded text-[11px] font-mono font-medium transition-all ${
               cameraPreset === preset
-                ? 'bg-cyan-500 text-slate-950 font-bold shadow-[0_0_10px_rgba(0,240,255,0.4)]'
+                ? preset === 'ROBOT_POV'
+                  ? 'bg-emerald-500 text-slate-950 font-bold shadow-[0_0_12px_rgba(16,185,129,0.6)] animate-pulse'
+                  : 'bg-cyan-500 text-slate-950 font-bold shadow-[0_0_10px_rgba(0,240,255,0.4)]'
                 : 'text-slate-300 hover:text-white hover:bg-slate-800'
             }`}
           >
-            {preset}
+            {preset === 'ROBOT_POV' ? '🤖 ROBOT POV' : preset}
           </button>
         ))}
       </div>
+
+      {/* ROBOT FIRST-PERSON COCKPIT POV HUD OVERLAY */}
+      {cameraPreset === 'ROBOT_POV' && (
+        <div className="pointer-events-none absolute inset-0 z-20 flex flex-col justify-between p-4 bg-emerald-950/5 scanline-effect select-none font-mono">
+          {/* Top POV Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2 bg-slate-950/95 border border-emerald-500/80 px-3.5 py-1.5 rounded-lg text-xs text-emerald-300 shadow-[0_0_25px_rgba(16,185,129,0.4)]">
+              <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
+              <span className="font-bold tracking-widest uppercase">
+                ROBOT-01 // FIRST-PERSON EXPLORATION COCKPIT
+              </span>
+              <span className="bg-emerald-500 text-slate-950 px-1.5 rounded text-[10px] font-extrabold">
+                DRIVE CAM
+              </span>
+            </div>
+
+            <div className="pointer-events-auto flex items-center gap-2">
+              <button
+                onClick={() => setCameraPreset('COMMAND')}
+                className="px-3 py-1.5 rounded-lg bg-slate-900/90 border border-slate-700 hover:border-slate-500 text-slate-300 hover:text-white text-xs font-bold transition-all shadow-lg"
+              >
+                ✕ EXIT ROBOT POV
+              </button>
+            </div>
+          </div>
+
+          {/* Center Tactical Crosshair & Building Part Identification Reticles */}
+          <div className="relative flex-1 flex items-center justify-center">
+            {/* Center Reticle */}
+            <div className="w-16 h-16 border border-emerald-500/40 rounded-full flex items-center justify-center">
+              <div className="w-2 h-2 rounded-full bg-emerald-400/80 animate-pulse" />
+              <div className="absolute w-24 h-[1px] bg-emerald-500/30" />
+              <div className="absolute h-24 w-[1px] bg-emerald-500/30" />
+            </div>
+
+            {/* Floating AR Reticle 1: Buckled Column */}
+            <div className="absolute top-[28%] left-[24%] border border-red-500/80 bg-red-950/80 px-2 py-1 rounded text-[10px] text-red-200 shadow-[0_0_12px_rgba(239,68,68,0.5)] animate-pulse">
+              <div className="font-bold text-red-400">🎯 TARGET 1: COLUMN C-04</div>
+              <div className="text-[9px] text-red-300">BUCKLED LOAD BEAM // 88% CRITICAL</div>
+            </div>
+
+            {/* Floating AR Reticle 2: Fractured Floor 3-4 Slabs */}
+            <div className="absolute top-[22%] right-[22%] border border-amber-500/80 bg-amber-950/80 px-2 py-1 rounded text-[10px] text-amber-200 shadow-[0_0_12px_rgba(245,158,11,0.5)]">
+              <div className="font-bold text-amber-400">🎯 TARGET 2: FLOOR 3-4 SLABS</div>
+              <div className="text-[9px] text-amber-300">FRACTURED & DROPPED // REBAR EXPOSED</div>
+            </div>
+
+            {/* Floating AR Reticle 3: Basement Void & Survivor */}
+            <div className="absolute bottom-[28%] left-[46%] -translate-x-1/2 border border-emerald-400 bg-slate-950/90 px-2.5 py-1.5 rounded-lg text-[10px] text-emerald-200 shadow-[0_0_20px_rgba(16,185,129,0.7)] flex items-center gap-1.5">
+              <Flame className="w-3.5 h-3.5 text-amber-400 animate-bounce" />
+              <div>
+                <div className="font-bold text-emerald-300">🎯 TARGET 3: BASEMENT VOID B-2</div>
+                <div className="text-[9px] text-amber-300 font-bold">SURVIVOR BIO-HEAT: 37.2°C (STABLE)</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Telemetry HUD */}
+          <div className="flex items-end justify-between">
+            <div className="bg-slate-950/90 border border-slate-800 p-2.5 rounded-lg text-[11px] text-slate-300 space-y-0.5">
+              <div className="text-emerald-400 font-bold flex items-center gap-1.5">
+                <Crosshair className="w-3.5 h-3.5" />
+                <span>LiDAR RANGEFINDER: 2.8m</span>
+              </div>
+              <div className="text-[10px] text-slate-400">
+                PITCH: -3.8° | ROLL: +0.4° | TREAD SPEED: 0.4 m/s
+              </div>
+            </div>
+
+            <div className="bg-slate-950/90 border border-emerald-500/60 p-2.5 rounded-lg text-xs text-emerald-300">
+              <span className="font-bold text-white">RECON STATUS: </span>
+              <span>VOID PENETRATED // EXTRICATION TOOL ATTACHED</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Viewport Coordinate Watermark */}
       <div className="absolute bottom-3 left-3 z-10 pointer-events-none font-mono text-[10px] text-slate-500 bg-slate-950/70 px-2 py-0.5 rounded border border-slate-800 flex items-center gap-2">

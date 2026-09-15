@@ -10,6 +10,7 @@ import {
   VolumeX,
   Server,
   Radio,
+  BookOpen,
 } from 'lucide-react';
 
 export const Header: React.FC = () => {
@@ -25,6 +26,7 @@ export const Header: React.FC = () => {
   const toggleInterviewMode = useRescueTwinStore((s) => s.toggleInterviewMode);
   const toggleSound = useRescueTwinStore((s) => s.toggleSound);
   const setArchitectureModal = useRescueTwinStore((s) => s.setArchitectureModal);
+  const setGuideModalOpen = useRescueTwinStore((s) => s.setGuideModalOpen);
 
   // Clock ticker
   useEffect(() => {
@@ -103,6 +105,16 @@ export const Header: React.FC = () => {
 
       {/* Right Controls & Demo Triggers */}
       <div className="flex items-center gap-2">
+        {/* Interactive Quick Guide & Tour Button */}
+        <button
+          onClick={() => setGuideModalOpen(true)}
+          className="flex items-center gap-1.5 px-3 py-1.5 rounded text-xs font-mono font-bold bg-cyan-950/90 hover:bg-cyan-900 border border-cyan-400/80 text-cyan-200 shadow-[0_0_15px_rgba(0,240,255,0.3)] transition-all hover:scale-105"
+          title="Open Interactive Demonstration & User Guide"
+        >
+          <BookOpen className="w-3.5 h-3.5 text-cyan-300 animate-pulse" />
+          <span>QUICK GUIDE & TOUR</span>
+        </button>
+
         {/* Interactive Demo Mode Button */}
         <button
           onClick={isDemoRunning ? pauseDemo : startDemo}

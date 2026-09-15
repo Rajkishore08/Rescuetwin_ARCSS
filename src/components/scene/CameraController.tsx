@@ -6,10 +6,11 @@ import { useRescueTwinStore } from '../../state/rescueTwinStore';
 
 export const CameraController: React.FC = () => {
   const { camera, gl } = useThree();
-  const controlsRef = useRef<OrbitControlsImpl>(null);
   const cameraPreset = useRescueTwinStore((s) => s.digitalTwin.cameraPreset);
   const zoomDistance = useRescueTwinStore((s) => s.cameraZoomDistance);
+  const robotPos = useRescueTwinStore((s) => s.telemetry.robot.position);
 
+  const controlsRef = useRef<OrbitControlsImpl>(null);
   const targetPos = useRef(new THREE.Vector3(14, 12, 16));
   const targetLook = useRef(new THREE.Vector3(0, 2.5, 0));
   const isTransitioning = useRef(false);
@@ -33,9 +34,14 @@ export const CameraController: React.FC = () => {
         targetPos.current.set(5.5, 5.0, 10.5);
         targetLook.current.set(0.5, 0.5, 2.0);
         break;
+      case 'ROBOT_POV':
+        // First-person cockpit view right from robot chassis looking directly into the broken building
+        targetPos.current.set(robotPos[0], robotPos[1] + 0.6, robotPos[2] + 0.4);
+        targetLook.current.set(robotPos[0] * 0.4, 2.2, robotPos[2] - 6.5);
+        break;
     }
     isTransitioning.current = true;
-  }, [cameraPreset]);
+  }, [cameraPreset, robotPos]);
 
   // Adjust zoom distance smoothly when slider changes
   useEffect(() => {

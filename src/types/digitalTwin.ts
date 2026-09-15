@@ -1,4 +1,4 @@
-export type CameraPreset = 'COMMAND' | 'AERIAL' | 'BUILDING' | 'ROBOT';
+export type CameraPreset = 'COMMAND' | 'AERIAL' | 'BUILDING' | 'ROBOT' | 'ROBOT_POV';
 
 export interface ZoneState {
   id: 'ZONE_A' | 'ZONE_B' | 'ZONE_C' | 'SURVIVOR_ZONE';
